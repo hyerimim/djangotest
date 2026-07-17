@@ -1,0 +1,59 @@
+.status-dot.is-demo {
+  background: var(--tangerine-500);
+  border-color: rgba(240, 164, 73, 0.18);
+  box-shadow: 0 0 0 3px rgba(240, 164, 73, 0.09);
+}
+
+.selected-route-line {
+  animation: route-draw 0.62s var(--ease) both;
+}
+
+@keyframes route-draw {
+  from { stroke-dasharray: 12 10; stroke-dashoffset: 42; opacity: 0.4; }
+  to { stroke-dasharray: 0; stroke-dashoffset: 0; opacity: 1; }
+}
+
+.demo-zone { transition: opacity 0.2s ease; }
+
+.saved-route-list { display: grid; gap: 8px; }
+.saved-route-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid var(--stone-200);
+  border-radius: 13px;
+  background: var(--white);
+  color: var(--stone-800);
+  text-align: left;
+  transition: border-color 0.16s ease, background-color 0.16s ease, transform 0.16s ease;
+}
+.saved-route-row:hover {
+  border-color: var(--sky-300);
+  background: var(--sky-25);
+  transform: translateY(-1px);
+}
+.saved-route-row > span { display: grid; gap: 3px; min-width: 0; }
+.saved-route-row strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.saved-route-row small,
+.saved-route-note { color: var(--stone-500); font-size: 10px; font-weight: 650; }
+.saved-route-row .icon { width: 16px; height: 16px; flex: 0 0 auto; }
+.saved-route-note { margin-top: 10px !important; }
+
+@media (max-width: 860px) {
+  .route-panel.is-collapsed .route-panel__scroll { overflow: hidden; }
+  .route-panel.is-collapsed .search-section { padding-top: 17px; }
+  .route-panel.is-collapsed .route-form,
+  .route-panel.is-collapsed .wind-summary-card,
+  .route-panel.is-collapsed .route-results,
+  .route-panel.is-collapsed .route-tip,
+  .route-panel.is-collapsed .panel-footer,
+  .route-panel.is-collapsed .beta-badge { display: none; }
+}
