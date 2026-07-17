@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}대시보드 - 습관 트래커{% endblock %}
+{% block content %}
+<section class="new-habit">
+    <form method="post" action="{% url 'habits:habit_create' %}" class="inline-form">
+        {% csrf_token %}
+        {{ form.name }}
+        {{ form.color }}
+        <button type="submit" class="btn-primary">습관 추가</button>
+    </form>
+</section>
+
+{% if rows %}
+<section class="habit-list">
+    {% for row in rows %}
+    <div class="habit-card" style="--habit-color: {{ row.habit.color }}">
+        <div class="habit-head">
+            <span class="habit-name">{{ row.habit.name }}</span>
+            <span class="streak">🔥 {{ row.streak }}일 연속</span>
+            <form method="post" action="{% url 'habits:habit_delete' row.habit.pk %}" class="inline-form">
+                {% csrf_token %}
+                <button type="submit" class="link-btn danger" onclick="return confirm('삭제할까요?')">삭제</button>
+            </form>
+        </div>
+        <div class="week-grid">
+            {% for day in row.days %}
+            <form method="post" action="{% url 'habits:habit_toggle' row.habit.pk %}" class="day-form">
+                {% csrf_token %}
+                <input type="hidden" name="date" value="{{ day.date|date:'Y-m-d' }}">
+                <button type="submit" class="day-cell {% if day.done %}done{% endif %}" title="{{ day.date }}">
+                    {{ day.date|date:'d' }}
+                </button>
+            </form>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</section>
+{% else %}
+<p class="empty">아직 등록된 습관이 없어요. 위에서 첫 습관을 추가해보세요.</p>
+{% endif %}
+{% endblock %}
