@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#6CCAF2" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="제주도의 바람 방향과 노출 구간을 고려해 이동 경로를 비교하는 지도형 웹 앱"
+    />
+    <meta property="og:title" content="바람길 제주" />
+    <meta
+      property="og:description"
+      content="제주에서 바람을 조금 덜 맞는 길을 찾아보세요."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <title>바람길 제주 — 바람을 덜 맞는 길</title>
+
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="./favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./site.webmanifest" />
+    <link rel="stylesheet" href="./styles.css?v=20260717-3" />
+    <link rel="stylesheet" href="./enhancements.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#routeSearch">경로 검색으로 바로가기</a>
+
+    <div class="app-shell" id="appShell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="바람길 제주 홈">
+          <img class="brand__mark" src="./assets/logo-mark.svg" alt="" width="44" height="44" />
+          <span class="brand__copy">
+            <strong>바람길 제주</strong>
+            <small>바람을 조금 덜 맞는 길</small>
+          </span>
+        </a>
+
+        <nav class="topbar__actions" aria-label="주요 메뉴">
+          <button class="button button--ghost topbar-button" type="button" id="savedRouteButton">
+            <svg class="icon" aria-hidden="true"><use href="#icon-bookmark"></use></svg>
+            <span>저장 경로</span>
+          </button>
+          <button class="button button--primary topbar-button" type="button" id="openReportButton">
+            <svg class="icon" aria-hidden="true"><use href="#icon-pin-plus"></use></svg>
+            <span>바람 신고</span>
+          </button>
+        </nav>
+      </header>
+
+      <main class="workspace">
+        <section class="map-stage" aria-label="제주 경로 지도">
+          <div id="map" class="map-canvas" role="application" aria-label="제주 지도"></div>
+
+          <div id="demoMap" class="demo-map" aria-hidden="true">
+            <svg
+              id="demoMapSvg"
+              viewBox="0 0 1000 720"
+              preserveAspectRatio="xMidYMid slice"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="demoSea" x1="120" y1="20" x2="870" y2="705" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#DDF5FE" />
+                  <stop offset="1" stop-color="#BFEAF8" />
+                </linearGradient>
+                <linearGradient id="demoLand" x1="212" y1="188" x2="790" y2="550" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#F4F7EC" />
+                  <stop offset="1" stop-color="#E7F0DB" />
+                </linearGradient>
+                <filter id="islandShadow" x="-20%" y="-20%" width="140%" height="150%">
+                  <feDropShadow dx="0" dy="13" stdDeviation="13" flood-color="#5C9AB3" flood-opacity=".18" />
+                </filter>
+                <filter id="routeShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#274C60" flood-opacity=".25" />
+                </filter>
+                <pattern id="orchardPattern" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
+                  <rect width="22" height="22" fill="#E8F2DE" />
+                  <path d="M0 11h22" stroke="#D5E6C8" stroke-width="3" />
+                </pattern>
+              </defs>
+
+              <rect width="1000" height="720" fill="url(#demoSea)" />
+              <path d="M0 86c129 51 213 4 334 27 148 28 252 54 367 25 116-29 181-6 299 41" fill="none" stroke="#EAF9FE" stroke-width="3" opacity=".78" />
+              <path d="M0 621c154-38 237 11 360-19 152-37 285-13 391 13 95 24 159 15 249-17" fill="none" stroke="#A7DAEC" stroke-width="2" opacity=".5" />
+              <g opacity=".45" fill="none" stroke="#95D0E4" stroke-width="2">
+                <path d="M49 175c43-16 85-16 128 0" />
+                <path d="M73 193c30-11 61-11 92 0" />
+                <path d="M830 531c37-13 74-13 111 0" />
+                <path d="M849 549c25-8 51-8 77 0" />
+              </g>
+
+              <g filter="url(#islandShadow)">
+                <path
+                  id="jejuIslandShape"
+                  d="M190 381c1-83 68-164 174-210 105-45 252-51 366-9 96 36 155 105 134 179-18 64-91 119-188 157-113 44-265 55-370 16-79-29-117-77-116-133Z"
+                  fill="url(#demoLand)"
+                  stroke="#C6D9C2"
+                  stroke-width="4"
+                />
+                <path
+                  d="M210 378c1-71 61-141 156-182 96-42 229-48 333-11 88 31 143 90 124 154-17 56-82 102-170 136-103 39-241 48-336 14-71-26-108-66-107-111Z"
+                  fill="url(#orchardPattern)"
+                  opacity=".66"
+                />
+              </g>
+
+              <g class="demo-roads" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M227 362c105-88 241-128 384-107 86 13 153 45 215 99" stroke="#fff" stroke-width="17" opacity=".88" />
+                <path d="M227 362c105-88 241-128 384-107 86 13 153 45 215 99" stroke="#D7DEE1" stroke-width="3" />
+                <path d="M254 444c106 56 249 64 369 28 75-23 135-57 184-105" stroke="#fff" stroke-width="16" opacity=".88" />
+                <path d="M254 444c106 56 249 64 369 28 75-23 135-57 184-105" stroke="#D7DEE1" stroke-width="3" />
+                <path d="M364 201c39 61 67 129 74 200 5 49-2 90-15 123" stroke="#fff" stroke-width="13" opacity=".84" />
+                <path d="M364 201c39 61 67 129 74 200 5 49-2 90-15 123" stroke="#D8E0E2" stroke-width="2.5" />
+                <path d="M636 196c-29 48-48 104-52 164-4 57 4 100 18 135" stroke="#fff" stroke-width="13" opacity=".84" />
+                <path d="M636 196c-29 48-48 104-52 164-4 57 4 100 18 135" stroke="#D8E0E2" stroke-width="2.5" />
+              </g>
+
+              <g opacity=".94">
+                <path d="M451 377c13-34 31-59 53-74 15 10 31 29 45 57l-16 10-15-17-14 13-15-18-18 29Z" fill="#789D78" />
+                <path d="M464 381c12-19 25-34 40-44 11 7 23 19 35 37l-15 7-12-11-11 10-14-11-23 12Z" fill="#F8FAF4" opacity=".88" />
+                <text x="505" y="410" text-anchor="middle" fill="#4F6A5B" font-size="14" font-weight="700">한라산</text>
+              </g>
+
+              <g id="demoZoneLayer" opacity=".9"></g>
+              <g id="demoRouteLayer" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#routeShadow)"></g>
+              <g id="demoMarkerLayer"></g>
+
+              <g class="demo-labels" font-family="Pretendard, sans-serif" fill="#4A6573">
+                <g transform="translate(309 260)">
+                  <rect x="-35" y="-17" width="70" height="31" rx="12" fill="#fff" fill-opacity=".9" />
+                  <text text-anchor="middle" y="5" font-size="14" font-weight="700">제주시</text>
+                </g>
+                <g transform="translate(575 501)">
+                  <rect x="-42" y="-17" width="84" height="31" rx="12" fill="#fff" fill-opacity=".9" />
+                  <text text-anchor="middle" y="5" font-size="14" font-weight="700">서귀포시</text>
+                </g>
+                <text x="727" y="265" font-size="13" font-weight="600">성산</text>
+                <text x="216" y="354" font-size="13" font-weight="600">애월</text>
+                <text x="776" y="386" font-size="13" font-weight="600">표선</text>
+                <text x="279" y="486" font-size="13" font-weight="600">중문</text>
+              </g>
+
+              <g id="demoWindArrows" opacity=".65" fill="none" stroke="#4BAED6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M127 145l56 31-20 1m20-1-10-18" />
+                <path d="M792 111l56 31-20 1m20-1-10-18" />
+                <path d="M107 539l56 31-20 1m20-1-10-18" />
+                <path d="M821 575l56 31-20 1m20-1-10-18" />
+              </g>
+            </svg>
+          </div>
+
+          <div class="map-top-controls" aria-label="지도 보기 설정">
+            <div class="map-control-group">
+              <button class="map-control" type="button" id="mapTypeButton" aria-label="지도 유형 바꾸기" title="지도 유형 바꾸기">
+                <svg class="icon" aria-hidden="true"><use href="#icon-layers"></use></svg>
+              </button>
+              <button class="map-control" type="button" id="currentLocationButton" aria-label="현재 위치로 이동" title="현재 위치로 이동">
+                <svg class="icon" aria-hidden="true"><use href="#icon-location"></use></svg>
+              </button>
+            </div>
+          </div>
+
+          <button class="route-panel-launcher" type="button" id="showRoutePanelButton" aria-label="입력창 열기" title="입력창 열기">
+            <svg class="icon" aria-hidden="true"><use href="#icon-chevron"></use></svg>
+            <span>입력창 열기</span>
+          </button>
+
+        </section>
+
+        <aside class="route-panel" id="routePanel" aria-label="경로 검색 및 비교">
+          <button class="route-panel__toggle" type="button" id="toggleRoutePanelButton" aria-label="입력창 닫기" title="입력창 닫기">
+            <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+          </button>
+
+          <button class="mobile-sheet-handle" type="button" id="mobileSheetHandle" aria-label="경로 패널 펼치기 또는 접기">
+            <span></span>
+          </button>
+
+          <div class="route-panel__scroll">
+            <section class="search-section" id="routeSearch">
+              <div class="section-heading">
+                <div>
+                  <span class="eyebrow">제주 바람 회피 내비</span>
+                  <h1>어디로 이동하세요?</h1>
+                </div>
+              </div>
+
+              <form class="route-form" id="routeForm" novalidate>
+                <div class="route-input-stack">
+                  <div class="route-input-row">
+                    <span class="route-point route-point--start" aria-hidden="true"></span>
+                    <label class="sr-only" for="startInput">출발지</label>
+                    <input
+                      id="startInput"
+                      name="start"
+                      type="text"
+                      autocomplete="off"
+                      placeholder="출발지를 입력하세요"
+                      value=""
+                      list="placeSuggestions"
+                      required
+                    />
+                    <button class="input-icon-button" type="button" id="useCurrentStartButton" aria-label="현재 위치를 출발지로 사용" title="현재 위치">
+                      <svg class="icon" aria-hidden="true"><use href="#icon-location"></use></svg>
+                    </button>
+                  </div>
+
+                  <div class="route-input-divider" aria-hidden="true"><span></span></div>
+
+                  <div class="route-input-row">
+                    <span class="route-point route-point--goal" aria-hidden="true"></span>
+                    <label class="sr-only" for="goalInput">도착지</label>
+                    <input
+                      id="goalInput"
+                      name="goal"
+                      type="text"
+                      autocomplete="off"
+                      placeholder="도착지를 입력하세요"
+                      value=""
+                      list="placeSuggestions"
+                      required
+                    />
+                    <button class="input-icon-button" type="button" id="clearGoalButton" aria-label="도착지 지우기" title="지우기">
+                      <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+                    </button>
+                  </div>
+
+                  <button class="swap-button" type="button" id="swapRouteButton" aria-label="출발지와 도착지 바꾸기" title="출발·도착 바꾸기">
+                    <svg class="icon" aria-hidden="true"><use href="#icon-swap"></use></svg>
+                  </button>
+                </div>
+
+                <datalist id="placeSuggestions"></datalist>
+
+                <button class="button button--search" type="submit" id="searchRouteButton">
+                  <svg class="icon" aria-hidden="true"><use href="#icon-route"></use></svg>
+                  <span>바람 덜 맞는 길 찾기</span>
+                </button>
+              </form>
+            </section>
+
+            <section class="wind-summary-card" aria-labelledby="windSummaryTitle">
+              <div class="wind-summary-card__icon" aria-hidden="true">
+                <svg class="icon"><use href="#icon-wind"></use></svg>
+              </div>
+              <div class="wind-summary-card__main">
+                <div class="wind-summary-card__title-row">
+                  <div>
+                    <span class="eyebrow" id="windSummaryTitle">현재 제주 바람</span>
+                    <strong id="windSummaryText">북서풍 7.2m/s</strong>
+                  </div>
+                  <span class="wind-level-badge" id="windLevelBadge">강함</span>
+                </div>
+                <p id="windNoticeText">해안도로보다 도심·중산간 도로를 우선 비교하고 있어요.</p>
+                <div class="wind-meter" aria-hidden="true">
+                  <span id="windMeterFill" style="width: 48%"></span>
+                </div>
+                <div class="wind-summary-card__meta">
+                  <span id="windUpdatedText">업데이트: 최신 정보 기준</span>
+                  <button class="text-button" type="button" id="windInfoButton">계산 방식</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="route-results" aria-labelledby="routeResultTitle">
+              <div class="route-results__heading">
+                <div>
+                  <span class="eyebrow">추천 경로</span>
+                  <h2 id="routeResultTitle">바람 노출을 비교했어요</h2>
+                </div>
+                <button class="icon-button" type="button" id="shareButton" aria-label="검색 결과 공유" title="공유">
+                  <svg class="icon" aria-hidden="true"><use href="#icon-share"></use></svg>
+                </button>
+              </div>
+
+              <div class="route-list" id="routeList" aria-live="polite"></div>
+            </section>
+
+            <section class="route-tip">
+              <svg class="icon" aria-hidden="true"><use href="#icon-spark"></use></svg>
+              <div>
+                <strong>제주다운 작은 팁</strong>
+                <p>방풍림과 건물이 많은 구간은 같은 거리라도 체감 바람이 훨씬 낮을 수 있어요.</p>
+              </div>
+            </section>
+
+            <footer class="panel-footer">
+              <p>
+                경로 추천은 바람 방향·속도와 시트에 등록한 노출 구간을 조합한 참고 정보입니다.
+                운전 중에는 실제 도로 상황과 안전 표지를 우선하세요.
+              </p>
+              <div>
+                <button type="button" class="footer-link" id="privacyButton">개인정보 안내</button>
+                <span aria-hidden="true">·</span>
+                <button type="button" class="footer-link" id="dataGuideButton">데이터 관리</button>
+              </div>
+            </footer>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <dialog class="modal" id="reportModal" aria-labelledby="reportModalTitle">
+      <form class="modal__card" id="reportForm" method="dialog">
+        <div class="modal__header">
+          <div>
+            <span class="eyebrow">현장 제보</span>
+            <h2 id="reportModalTitle">지금 바람은 어떤가요?</h2>
+          </div>
+          <button class="icon-button" type="button" id="closeReportButton" aria-label="신고 창 닫기">
+            <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+          </button>
+        </div>
+
+        <div class="modal__body">
+          <fieldset class="severity-fieldset">
+            <legend>체감 바람 세기</legend>
+            <div class="severity-options">
+              <label><input type="radio" name="severity" value="1" /><span>1<small>잔잔</small></span></label>
+              <label><input type="radio" name="severity" value="2" /><span>2<small>약함</small></span></label>
+              <label><input type="radio" name="severity" value="3" checked /><span>3<small>보통</small></span></label>
+              <label><input type="radio" name="severity" value="4" /><span>4<small>강함</small></span></label>
+              <label><input type="radio" name="severity" value="5" /><span>5<small>매우 강함</small></span></label>
+            </div>
+          </fieldset>
+
+          <label class="field-label" for="reportLocationText">위치</label>
+          <div class="location-field">
+            <input id="reportLocationText" name="locationText" type="text" value="지도 중심 위치" maxlength="80" />
+            <button class="button button--soft" type="button" id="reportCurrentLocationButton">
+              <svg class="icon" aria-hidden="true"><use href="#icon-location"></use></svg>
+              현재 위치
+            </button>
+          </div>
+
+          <label class="field-label" for="reportComment">메모 <span>선택</span></label>
+          <textarea id="reportComment" name="comment" rows="4" maxlength="300" placeholder="예: 해안 쪽에서 횡풍이 강하고, 건물 뒤는 비교적 잔잔해요."></textarea>
+          <div class="textarea-meta"><span id="reportCharCount">0</span>/300</div>
+
+          <input class="honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <input type="hidden" name="lat" id="reportLat" />
+          <input type="hidden" name="lng" id="reportLng" />
+        </div>
+
+        <div class="modal__actions">
+          <button class="button button--ghost" type="button" id="cancelReportButton">취소</button>
+          <button class="button button--primary" type="submit" id="submitReportButton">신고</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="modal modal--info" id="infoModal" aria-labelledby="infoModalTitle">
+      <article class="modal__card">
+        <div class="modal__header">
+          <div>
+            <span class="eyebrow" id="infoModalEyebrow">안내</span>
+            <h2 id="infoModalTitle">계산 방식</h2>
+          </div>
+          <button class="icon-button" type="button" id="closeInfoButton" aria-label="안내 창 닫기">
+            <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+          </button>
+        </div>
+        <div class="modal__body rich-copy" id="infoModalContent"></div>
+        <div class="modal__actions">
+          <button class="button button--primary" type="button" id="confirmInfoButton">확인</button>
+        </div>
+      </article>
+    </dialog>
+
+    <div class="loading-layer" id="loadingLayer" hidden>
+      <div class="loading-card" role="status" aria-live="polite">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <strong id="loadingText">바람을 피해 경로를 비교하는 중…</strong>
+        <small>지도 경로와 방풍 구간을 함께 계산하고 있어요.</small>
+      </div>
+    </div>
+
+    <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
+    <svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <symbol id="icon-bookmark" viewBox="0 0 24 24"><path d="M7 4.75A1.75 1.75 0 0 1 8.75 3h6.5A1.75 1.75 0 0 1 17 4.75V21l-5-3.1L7 21V4.75Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /></symbol>
+      <symbol id="icon-pin-plus" viewBox="0 0 24 24"><path d="M12 21s6-5.22 6-11a6 6 0 1 0-12 0c0 5.78 6 11 6 11Z" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="M12 7v6M9 10h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></symbol>
+      <symbol id="icon-wind" viewBox="0 0 24 24"><path d="M3 8h9.2c2.8 0 2.8-4 0-4-1.2 0-2 .6-2.4 1.5M3 12h14c3.2 0 3.2-4.5 0-4.5-1.4 0-2.3.7-2.7 1.8M3 16h8.5c2.8 0 2.8 4 0 4-1.2 0-2-.6-2.4-1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></symbol>
+      <symbol id="icon-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="m4.5 12 7.5 4.2 7.5-4.2M4.5 16l7.5 4.2 7.5-4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="icon-location" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8" /></symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" /></symbol>
+      <symbol id="icon-swap" viewBox="0 0 24 24"><path d="M8 5h9l-2.7-2.7M16 19H7l2.7 2.7M17 5l-2.7 2.7M7 19l2.7-2.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="icon-route" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2.5" fill="none" stroke="currentColor" stroke-width="1.8" /><circle cx="18" cy="6" r="2.5" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="M8.5 18h2.2c1.7 0 3-1.3 3-3s-1.3-3-3-3h-1.4c-1.7 0-3-1.3-3-3S7.6 6 9.3 6h6.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></symbol>
+      <symbol id="icon-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5" fill="none" stroke="currentColor" stroke-width="1.8" /><circle cx="6" cy="12" r="2.5" fill="none" stroke="currentColor" stroke-width="1.8" /><circle cx="18" cy="19" r="2.5" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="m8.3 10.9 7.4-4.5M8.3 13.1l7.4 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></symbol>
+      <symbol id="icon-spark" viewBox="0 0 24 24"><path d="m12 2 1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2ZM19 15l.8 2.7 2.7.8-2.7.8L19 22l-.8-2.7-2.7-.8 2.7-.8L19 15ZM5 14l.7 2.3L8 17l-2.3.7L5 20l-.7-2.3L2 17l2.3-.7L5 14Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" /></symbol>
+      <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="M12 7v5l3.2 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></symbol>
+      <symbol id="icon-road" viewBox="0 0 24 24"><path d="M8.2 3 5 21M15.8 3 19 21M12 4.5v3M12 10.5v3M12 16.5v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></symbol>
+      <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 2.9 8 7 10 4.1-2 7-5.5 7-10V6l-7-3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="m8.5 12 2.2 2.2 4.8-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="icon-warning" viewBox="0 0 24 24"><path d="M12 3 2.8 20h18.4L12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M12 9v5M12 17.5v.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" /></symbol>
+    </svg>
+
+    <script src="./config.js"></script>
+    <script src="./app.js?v=20260717-3" defer></script>
+  </body>
+</html>
